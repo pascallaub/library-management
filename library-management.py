@@ -136,27 +136,62 @@ def rent_book():
             print("Bitte gib eine gültige Buch-ID ein!")
     
     bookconn.close()
-        
+
+
+def return_book():
+    pass
+
+
+def delete_book():
+    pass
+
+def login_menu():
+    userconn = userdb_connection()
+    user_cursor = userconn.cursor()
+
+    choice = input("Willst du dich anmelden(1) oder registrieren(2): ")
+    try:
+        if choice == '1':
+            username = input("Benutzername: ")
+            password = getpass.getpass("Passwort: ")
+            user_cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+            result = user_cursor.fetchone()
+            if result:
+                stored_password_hash = result[0]
+                password_hash = hashlib.pbkdf2_hmac(
+                    'sha256',
+                    password.encode('utf-8'),
+                    b'some_salt',
+                    100000
+                )
+                if stored_password_hash == password_hash:
+                    main_menu()
+                else:
+                    print("Falsches Passwort!")
+                    login_menu()
+        elif choice == '2':
+            register()
+    except ValueError:
+        print("Gib eine Zahl ein!")
+
 
 def main_menu():
     while True:
-        choice = input("Registrieren (1)\nBücher ausleihen (2)\nBücher zurückgeben (3)\nBücher hinzufügen (4)\nBücher löschen (5)\nBeenden (6)\nGib eine Zahl ein: ")
+        choice = input("Bücher ausleihen (2)\nBücher zurückgeben (3)\nBücher hinzufügen (4)\nBücher löschen (5)\nBeenden (6)\nGib eine Zahl ein: ")
 
         if choice == '1':
-            register()
-        elif choice == '2':
             rent_book()
-        elif choice == '3':
+        elif choice == '2':
             return_book()
-        elif choice == '4':
+        elif choice == '3':
             add_book()
-        elif choice == '5':
+        elif choice == '4':
             delete_book()
-        elif choice == '6':
+        elif choice == '5':
             quit()
         else:
             print("Falsche Eingabe!")
 
 if __name__ == '__main__':
     create_database_tables()
-    main_menu()
+    login_menu()
