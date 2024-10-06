@@ -10,9 +10,6 @@ def userdb_connection():
 def bookdb_connection():
     return sqlite3.connect("Database/bookdb.db")
 
-def permissiondb_connection():
-    return sqlite3.connect("Database/rbac.db")
-
 def create_database_tables():
     userconn = userdb_connection()
     bookconn = bookdb_connection()
@@ -24,8 +21,7 @@ def create_database_tables():
                             username TEXT NOT NULL,
                             email TEXT NOT NULL,
                             password BLOB NOT NULL,
-                            register_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                            role_id INTEGER
+                            register_date TEXT DEFAULT CURRENT_TIMESTAMP
                             )
                         ''')
     
@@ -57,7 +53,26 @@ def add_book(title, author, genre, status, lent_to):
 def register_user(username, email, password):
     userconn = userdb_connection()
     user_cursor = userconn.cursor()
+<<<<<<< HEAD
     password_hash = hashlib.pbkdf2_hmac(
+=======
+
+    print("Willkommen! Du befindest dich im Registrierungsprozess!")
+    username = input("Benutzername: ")
+    user_cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    result = user_cursor.fetchone()
+    if result:
+        print("Benutzername bereits vergeben!")
+        userconn.close()
+        register()
+        return
+    email = input("Email-Adresse: ")
+    password = getpass.getpass("Passwort: ")
+    password_check = getpass.getpass("Passwort wiederholen: ")
+
+    if password == password_check:
+        password_hash = hashlib.pbkdf2_hmac(
+>>>>>>> parent of 76a70f5 (implemented rbac and other functions)
             'sha256',
             password.encode('utf-8'),
             b'some_salt',
@@ -106,6 +121,7 @@ def rent_book():
 
 
 def return_book():
+<<<<<<< HEAD
     book_con = bookdb_connection()
     cursor_book = book_con.cursor()
 
@@ -231,26 +247,13 @@ def check_permission(username, action):
     return True
 
 class PermissionDenied(Exception):
+=======
+>>>>>>> parent of 76a70f5 (implemented rbac and other functions)
     pass
 
 
-
-def current_user(username):
-    user_conn = userdb_connection()
-    cursor_user = user_conn.cursor()
-
-    cursor_user.execute("SELECT username FROM users WHERE username = ?", (username,))
-    result = current_user.fetchone()
-
-    if result:
-        return result[0]
-    else:
-        return None
-    
-    current_username = result[0]
-
-    user_conn.close()
-
+def delete_book():
+    pass
 
 def login_user(username, password):
     userconn = userdb_connection()
@@ -275,28 +278,20 @@ def login_user(username, password):
 
 
 def main_menu():
-    current_username = current_user('username')
     while True:
-        try:
-            choice = input("Bücher ausleihen (2)\nBücher zurückgeben (3)\nBücher hinzufügen (4)\nBücher löschen (5)\nBeenden (6)\nGib eine Zahl ein: ")
+        choice = input("Bücher ausleihen (2)\nBücher zurückgeben (3)\nBücher hinzufügen (4)\nBücher löschen (5)\nBeenden (6)\nGib eine Zahl ein: ")
 
-            if choice == '1':
-                check_permission(current_user, 'update')
-                rent_book()
-            elif choice == '2':
-                check_permission(current_user, 'update')
-                return_book()
-            elif choice == '3':
-                check_permission(current_user, 'create')
-                add_book()
-            elif choice == '4':
-                check_permission(current_user, 'delete')
-                delete_book()
-            elif choice == '5':
-                quit()
-            else:
-                print("Falsche Eingabe!")
-        except ValueError:
+        if choice == '1':
+            rent_book()
+        elif choice == '2':
+            return_book()
+        elif choice == '3':
+            add_book()
+        elif choice == '4':
+            delete_book()
+        elif choice == '5':
+            quit()
+        else:
             print("Falsche Eingabe!")
 
 def create_gui():
